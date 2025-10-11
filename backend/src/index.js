@@ -4,7 +4,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 
+import cookieParser from 'cookie-parser';
+
 const app = express();
+app.use(cookieParser());
 app.use(
 	cors({
 		origin: 'http://localhost:5173',
