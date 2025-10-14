@@ -1,29 +1,62 @@
 import Order from '../models/orderModel.js';
+import Product from '../models/productModel.js';
+import Cart from '../models/cartModel.js';
 
 // @desc    Create new order
 // @route   POST /api/orders
 // @access  Private
 export const addOrderItems = async (req, res) => {
 	try {
-		const {
-			orderItems,
-			shippingAddress,
-			paymentMethod,
-			taxPrice,
-			shippingPrice,
-			totalPrice,
-		} = req.body;
+		const { shippingAddress, paymentMethod } = req.body;
 
-		if (orderItems && orderItems.length === 0) {
-			res.status(400).json({ message: 'No order items', success: false });
-			return;
+		// Find the user's cart from the database
+		const cart = await Cart.findOne({ user: req.user._id });
+
+		if (!cart || cart.items.length === 0) {
+			return res
+				.status(400)
+				.json({ message: 'No items in cart to order', success: false });
 		}
 
+		const orderItems = cart.items;
+
+		// Get the product details for each order item from the database
+		const productIds = orderItems.map((item) => item.product);
+		const products = await Product.find({ _id: { $in: productIds } });
+
+		const productMap = new Map(products.map((p) => [p._id.toString(), p]));
+
+		// Create the final order items with authoritative data
+		const finalOrderItems = orderItems.map((item) => {
+			const product = productMap.get(item.product.toString());
+			if (!product) {
+				throw new Error(`Product not found: ${item.product}`);
+			}
+			return {
+				name: product.name,
+				quantity: item.quantity,
+				image: product.image,
+				price: product.price, // Use the price from the database
+				product: product._id,
+			};
+		});
+
+		// Recalculate prices on the backend
+		const itemsPrice = finalOrderItems.reduce(
+			(acc, item) => acc + item.price * item.quantity,
+			0
+		);
+		const taxPrice = Number((0.15 * itemsPrice).toFixed(2));
+		const shippingPrice = itemsPrice > 100 ? 0 : 10;
+		const totalPrice = itemsPrice + taxPrice + shippingPrice;
+
+		// Create the new order with verified data
 		const order = new Order({
 			user: req.user._id,
-			orderItems,
+			orderItems: finalOrderItems,
 			shippingAddress,
 			paymentMethod,
+			itemsPrice,
 			taxPrice,
 			shippingPrice,
 			totalPrice,
@@ -31,10 +64,13 @@ export const addOrderItems = async (req, res) => {
 
 		const createdOrder = await order.save();
 
-		res.status(201).json(createdOrder, { success: true });
+		// Clear the user's cart
+		await Cart.deleteOne({ _id: cart._id });
+
+		res.status(201).json({ data: createdOrder, success: true });
 	} catch (error) {
 		res.status(500).json({
-			message: `could not create order ${error.message}`,
+			message: `Could not create order: ${error.message}`,
 			success: false,
 		});
 	}
