@@ -37,6 +37,10 @@ app.use('/api/orders', orderRoutes);
 import cartRoutes from './routes/cartRoute.js';
 app.use('/api/cart', cartRoutes);
 
+// payment routes
+import paymentRoute from './routes/paymentRoute.js';
+app.use('/api/payment', paymentRoute);
+
 app.listen(process.env.PORT, () => {
 	console.log(`Server running on port ${process.env.PORT}`);
 });
