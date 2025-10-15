@@ -102,14 +102,12 @@ const PaymentPage = () => {
     const [clientSecret, setClientSecret] = useState("");
     const location = useLocation();
     const navigate = useNavigate();
-    const { cartItems: getCartItems, totalPrice: getTotalPrice } =
-        useCartStore.getState(); // Get latest state
-    const cartItems = getCartItems();
-    const totalPrice = getTotalPrice();
+    const { items: cartItems, totalPrice } = useCartStore.getState();
 
     useEffect(() => {
+        const finalTotal = totalPrice();
         // If there's no total price or the cart is empty, redirect
-        if (!totalPrice || totalPrice <= 0) {
+        if (!finalTotal || finalTotal <= 0) {
             toast.error("Your cart is empty or total is invalid.");
             navigate("/cart");
             return;
@@ -120,7 +118,7 @@ const PaymentPage = () => {
                 const { data } = await api.post(
                     "/api/payment/create-payment-intent",
                     {
-                        amount: Math.round(totalPrice * 100), // Amount in cents
+                        amount: Math.round(finalTotal * 100), // Amount in cents
                     }
                 );
                 setClientSecret(data.clientSecret);
@@ -132,11 +130,11 @@ const PaymentPage = () => {
 
         createPaymentIntent();
         getStripePromise(); // Pre-load stripe
-    }, [totalPrice, navigate]);
+    }, [navigate]);
 
     const orderDetails = {
-        orderItems: cartItems.map((item) => ({ ...item, product: item._id })),
-        totalPrice,
+        orderItems: cartItems.map((item) => ({ ...item, product: item.product._id })),
+        totalPrice: totalPrice(),
         // You should get shippingAddress and paymentMethod from a form in a previous step
         shippingAddress: {
             address: "123 Main St",

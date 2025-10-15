@@ -5,9 +5,23 @@ const useCartStore = create((set, get) => ({
   loading: false,
   error: null,
 
-  // Derived state
-  cartItems: () => get().items,
-  totalPrice: () => get().items.reduce((acc, item) => acc + item.product.price * item.quantity, 0),
+  // Derived state - Mimicking backend calculation
+  itemsPrice: () =>
+    get().items.reduce((acc, item) => acc + item.product.price * item.quantity, 0),
+  taxPrice: () => {
+    const itemsPrice = get().itemsPrice();
+    return Number((0.15 * itemsPrice).toFixed(2));
+  },
+  shippingPrice: () => {
+    const itemsPrice = get().itemsPrice();
+    return itemsPrice > 100 ? 0 : 10;
+  },
+  totalPrice: () => {
+    const itemsPrice = get().itemsPrice();
+    const taxPrice = get().taxPrice();
+    const shippingPrice = get().shippingPrice();
+    return itemsPrice + taxPrice + shippingPrice;
+  },
 
   // Fetch Cart
   fetchCart: async () => {
