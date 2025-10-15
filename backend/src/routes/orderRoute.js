@@ -16,8 +16,8 @@ router.post('/', protect, addOrderItems);
 router.get('/myorders', protect, getMyOrders);
 
 // ! Admin routes
-// GET /api/orders
-router.get('/', protect, admin, getOrders);
+// GET /api/orders/all
+router.get('/all', protect, admin, getOrders);
 // PUT /api/orders/:id/pay
 router.put('/:id/pay', protect, updateOrderToPaid);
 // PUT /api/orders/:id/deliver

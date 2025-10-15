@@ -43,7 +43,7 @@ const useOrderStore = create((set) => ({
     fetchAllOrders: async () => {
         set({ loading: true, error: null });
         try {
-            const response = await api.get("/api/orders");
+            const response = await api.get("/api/orders/all");
             set({ orders: response.data });
         } catch (error) {
             set({

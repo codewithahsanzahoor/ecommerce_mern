@@ -63,9 +63,8 @@ const CheckoutForm = ({ orderDetails }) => {
                 // Optional: Delete the created order if payment fails
             } else if (paymentIntent && paymentIntent.status === "succeeded") {
                 // 3. Mark the order as paid
-                await markAsPaid(newOrder._id);
+                await markAsPaid(newOrder.data._id);
                 toast.success("Payment successful!");
-                clearCart();
                 navigate("/profile");
             } else {
                 toast.error("Payment did not succeed.");
