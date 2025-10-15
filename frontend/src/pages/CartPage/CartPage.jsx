@@ -4,9 +4,16 @@ import { Link } from 'react-router-dom';
 import useCartStore from '../../store/cartStore';
 
 function CartPage() {
-  const { cartItems: getCartItems, totalPrice: getTotalPrice, updateCartItem, removeCartItem, clearCart } = useCartStore();
-  const cartItems = getCartItems();
-  const totalPrice = getTotalPrice();
+  const {
+    items: cartItems,
+    itemsPrice,
+    taxPrice,
+    shippingPrice,
+    totalPrice,
+    updateCartItem,
+    removeCartItem,
+    clearCart,
+  } = useCartStore();
 
   return (
     <div id='cart'>
@@ -54,16 +61,24 @@ function CartPage() {
             <div className='col-lg-4'>
               <div className='summary-card p-4 shadow-sm'>
                 <h5 className='mb-4'>Order Summary</h5>
-                <div className='d-flex justify-content-between mb-3'>
+                <div className='d-flex justify-content-between mb-2'>
                   <span className='text-muted'>Subtotal</span>
-                  <span>${totalPrice.toFixed(2)}</span>
+                  <span>${itemsPrice().toFixed(2)}</span>
+                </div>
+                <div className='d-flex justify-content-between mb-2'>
+                  <span className='text-muted'>Tax (15%)</span>
+                  <span>${taxPrice().toFixed(2)}</span>
+                </div>
+                <div className='d-flex justify-content-between mb-3'>
+                  <span className='text-muted'>Shipping</span>
+                  <span>${shippingPrice().toFixed(2)}</span>
                 </div>
                 <hr />
                 <div className='d-flex justify-content-between mb-4'>
                   <span className='fw-bold'>Total</span>
-                  <span className='fw-bold'>${totalPrice.toFixed(2)}</span>
+                  <span className='fw-bold'>${totalPrice().toFixed(2)}</span>
                 </div>
-                <Link to='/checkout' className='btn btn-primary checkout-btn w-100 mb-3'>
+                <Link to='/checkout' className={`btn btn-primary checkout-btn w-100 mb-3 ${cartItems.length === 0 ? 'disabled' : ''}`}>
                   Checkout
                 </Link>
                 <button onClick={clearCart} className='btn btn-outline-danger w-100'>Clear Cart</button>
