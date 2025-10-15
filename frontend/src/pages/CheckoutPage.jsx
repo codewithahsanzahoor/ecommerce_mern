@@ -4,7 +4,9 @@ import useCartStore from '../store/cartStore';
 
 function CheckoutPage() {
   const navigate = useNavigate();
-  const { cartItems, totalPrice } = useCartStore();
+  const { cartItems: getCartItems, totalPrice: getTotalPrice } = useCartStore();
+  const cartItems = getCartItems();
+  const totalPrice = getTotalPrice();
 
   const handleProceedToPayment = () => {
     // Here you could save shipping info if you had a form for it.

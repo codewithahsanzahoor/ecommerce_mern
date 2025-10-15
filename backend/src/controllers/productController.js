@@ -167,7 +167,7 @@ export const createProductReview = async (req, res) => {
 				product.reviews.length;
 
 			await product.save();
-			res.status(201).json({ message: 'Review added', success: true });
+			res.status(201).json(product); // Return the updated product
 		} else {
 			res.status(404).json({
 				message: 'Product not found',

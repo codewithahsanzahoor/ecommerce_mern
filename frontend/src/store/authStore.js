@@ -19,6 +19,7 @@ const useAuthStore = create(
 			token: null,
 			loading: false,
 			error: null,
+			isAuthenticated: () => get().user !== null,
 
 			// Login function
 			login: async (email, password) => {

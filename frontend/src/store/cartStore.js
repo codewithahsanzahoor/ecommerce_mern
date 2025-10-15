@@ -1,24 +1,27 @@
 import { create } from 'zustand';
 import api from '../lib/axios';
-const useCartStore = create((set) => ({
-	cart: [],
-	loading: false,
-	error: null,
+const useCartStore = create((set, get) => ({
+  items: [],
+  loading: false,
+  error: null,
 
-	// Fetch Cart
-	fetchCart: async () => {
-		set({ loading: true });
-		try {
-			const { data } = await api.get('/api/cart');
-			console.log(data.items);
-			set({ cart: data.items, loading: false });
-		} catch (error) {
-			set({
-				error: error.response?.data?.message || error.message,
-				loading: false,
-			});
-		}
-	},
+  // Derived state
+  cartItems: () => get().items,
+  totalPrice: () => get().items.reduce((acc, item) => acc + item.product.price * item.quantity, 0),
+
+  // Fetch Cart
+  fetchCart: async () => {
+    set({ loading: true });
+    try {
+      const { data } = await api.get('/api/cart');
+      set({ items: data.items, loading: false });
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || error.message,
+        loading: false,
+      });
+    }
+  },
 
 	// Add Item
 	addToCart: async (productId, quantity) => {
@@ -67,11 +70,10 @@ const useCartStore = create((set) => ({
 	// Clear Cart
 	clearCart: async () => {
 		set({ loading: true });
-		try {
-			await api.delete('/api/cart/clear');
-			set({ cart: [], loading: false });
-		} catch (error) {
-			set({
+		    try {
+		      await api.delete('/api/cart/clear');
+		      set({ items: [], loading: false });
+		    } catch (error) {			set({
 				error: error.response?.data?.message || error.message,
 				loading: false,
 			});
