@@ -93,6 +93,22 @@ const useProductStore = create((set) => ({
 			);
 		}
 	},
+
+	// Create a product review
+	createReview: async (productId, reviewData) => {
+		try {
+			const res = await api.post(`/api/products/${productId}/reviews`, reviewData);
+			set((state) => ({
+				product: res.data, // The backend should return the updated product with the new review
+				products: state.products.map((p) => p._id === productId ? res.data : p)
+			}));
+			toast.success('Review submitted successfully');
+		} catch (err) {
+			toast.error(
+				err.response?.data?.message || 'Failed to submit review'
+			);
+		}
+	},
 }));
 
 export default useProductStore;

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import useProductStore from '../store/productStore';
 import useCartStore from '../store/cartStore';
+import useAuthStore from '../store/authStore';
 
 function ProductDetailPage() {
 	const { id } = useParams();
@@ -179,8 +180,83 @@ function ProductDetailPage() {
 					</div> */}
 				</div>
 			</div>
+
+      {/* Reviews Section */}
+      <div className="row mt-5">
+        <div className="col-md-8">
+          <h3>Reviews ({ProductDetail.reviews?.length || 0})</h3>
+          {ProductDetail.reviews && ProductDetail.reviews.length > 0 ? (
+            <ul className="list-group">
+              {ProductDetail.reviews.map((review) => (
+                <li key={review._id} className="list-group-item">
+                  <strong>{review.name}</strong>
+                  <div className="mb-1">
+                    {[...Array(5)].map((_, i) => (
+                      <StarIcon key={i} fill={i < review.rating ? 'gold' : 'gray'} size={16} />
+                    ))}
+                  </div>
+                  <p>{review.comment}</p>
+                  <small className="text-muted">{new Date(review.createdAt).toLocaleDateString()}</small>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No reviews yet.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Write a Review Form */}
+      <div className="row mt-4">
+        <div className="col-md-8">
+          <h4>Write a Customer Review</h4>
+          <ReviewForm productId={id} />
+        </div>
+      </div>
 		</div>
 	);
 }
 
+// --- Review Form Component --- //
+const ReviewForm = ({ productId }) => {
+  const { createReview } = useProductStore();
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const { user, isAuthenticated } = useAuthStore.getState();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!comment.trim()) {
+      alert('Please enter a comment.');
+      return;
+    }
+    await createReview(productId, { rating, comment });
+    setComment('');
+    setRating(5);
+  };
+
+  if (!isAuthenticated) {
+    return <p>Please <Link to="/login">log in</Link> to write a review.</p>;
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="mb-3">
+        <label htmlFor="rating" className="form-label">Rating</label>
+        <select id="rating" className="form-select" value={rating} onChange={(e) => setRating(Number(e.target.value))}>
+          <option value="5">5 - Excellent</option>
+          <option value="4">4 - Good</option>
+          <option value="3">3 - Average</option>
+          <option value="2">2 - Fair</option>
+          <option value="1">1 - Poor</option>
+        </select>
+      </div>
+      <div className="mb-3">
+        <label htmlFor="comment" className="form-label">Comment</label>
+        <textarea id="comment" className="form-control" rows="3" value={comment} onChange={(e) => setComment(e.target.value)} required></textarea>
+      </div>
+      <button type="submit" className="btn btn-primary">Submit Review</button>
+    </form>
+  );
+};
 export default ProductDetailPage;

@@ -17,6 +17,8 @@ import CustomersPage from './pages/dashboard/CustomersPage';
 import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 import ProtectedRoute from './components/ProtectedRoute';
 import useAuthStore from './store/authStore';
+import ProfilePage from './pages/ProfilePage.jsx';
+import PaymentPage from './pages/PaymentPage.jsx';
 
 function App() {
 	const { fetchUser } = useAuthStore();
@@ -56,6 +58,8 @@ function App() {
 							path='/checkout'
 							element={<CheckoutPage />}
 						/>
+            <Route path='/profile' element={<ProfilePage />} />
+            <Route path='/payment' element={<PaymentPage />} />
 					</Route>
 				</Route>
 
