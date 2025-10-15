@@ -4,13 +4,15 @@ import useCartStore from '../store/cartStore';
 
 function CheckoutPage() {
   const navigate = useNavigate();
-  const { cartItems: getCartItems, totalPrice: getTotalPrice } = useCartStore();
-  const cartItems = getCartItems();
-  const totalPrice = getTotalPrice();
+  const {
+    items: cartItems,
+    itemsPrice,
+    taxPrice,
+    shippingPrice,
+    totalPrice,
+  } = useCartStore();
 
   const handleProceedToPayment = () => {
-    // Here you could save shipping info if you had a form for it.
-    // For now, we navigate directly to the payment page.
     navigate('/payment');
   };
 
@@ -29,17 +31,29 @@ function CheckoutPage() {
             </h4>
             <ul className='list-group mb-3'>
               {cartItems.map((item) => (
-                <li key={item._id} className='list-group-item d-flex justify-content-between lh-sm'>
+                <li key={item.product._id} className='list-group-item d-flex justify-content-between lh-sm'>
                   <div>
-                    <h6 className='my-0'>{item.name}</h6>
+                    <h6 className='my-0'>{item.product.name}</h6>
                     <small className='text-muted'>Quantity: {item.quantity}</small>
                   </div>
-                  <span className='text-muted'>${(item.price * item.quantity).toFixed(2)}</span>
+                  <span className='text-muted'>${(item.product.price * item.quantity).toFixed(2)}</span>
                 </li>
               ))}
               <li className='list-group-item d-flex justify-content-between'>
-                <span>Total (USD)</span>
-                <strong>${totalPrice.toFixed(2)}</strong>
+                <span className='text-muted'>Subtotal</span>
+                <span>${itemsPrice().toFixed(2)}</span>
+              </li>
+              <li className='list-group-item d-flex justify-content-between'>
+                <span className='text-muted'>Tax (15%)</span>
+                <span>${taxPrice().toFixed(2)}</span>
+              </li>
+              <li className='list-group-item d-flex justify-content-between'>
+                <span className='text-muted'>Shipping</span>
+                <span>${shippingPrice().toFixed(2)}</span>
+              </li>
+              <li className='list-group-item d-flex justify-content-between bg-light'>
+                <span className='fw-bold'>Total (USD)</span>
+                <strong>${totalPrice().toFixed(2)}</strong>
               </li>
             </ul>
             <button
