@@ -82,7 +82,7 @@ export const addOrderItems = async (req, res) => {
 export const getMyOrders = async (req, res) => {
 	try {
 		const orders = await Order.find({ user: req.user._id });
-		res.json(orders, { success: true });
+		res.json(orders);
 	} catch (error) {
 		res.status(500).json({ message: `${error.message}`, success: false });
 	}
@@ -94,7 +94,7 @@ export const getMyOrders = async (req, res) => {
 export const getOrders = async (req, res) => {
 	try {
 		const orders = await Order.find({}).populate('user', 'id name email');
-		res.json(orders, { success: true });
+		res.json(orders);
 	} catch (error) {
 		res.status(500).json({ message: `${error.message}`, success: false });
 	}
@@ -113,12 +113,12 @@ export const updateOrderToPaid = async (req, res) => {
 			order.paymentResult = {
 				id: req.body.id,
 				status: req.body.status,
-				update_time: req.body.update_time,
-				email_address: req.body.email_address,
+				update_time: req.body.created, // or another relevant timestamp from paymentIntent
+				email_address: req.body.receipt_email, // may be null
 			};
 
 			const updatedOrder = await order.save();
-			res.json(updatedOrder, { success: true });
+			res.json(updatedOrder);
 		} else {
 			res.status(404).json({
 				message: 'Order not found',
@@ -142,7 +142,7 @@ export const updateOrderToDelivered = async (req, res) => {
 			order.deliveredAt = Date.now();
 
 			const updatedOrder = await order.save();
-			res.json(updatedOrder, { success: true });
+			res.json(updatedOrder);
 		} else {
 			res.status(404).json({
 				message: 'Order not found',

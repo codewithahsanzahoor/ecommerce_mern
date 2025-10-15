@@ -63,8 +63,13 @@ const CheckoutForm = ({ orderDetails }) => {
                 // Optional: Delete the created order if payment fails
             } else if (paymentIntent && paymentIntent.status === "succeeded") {
                 // 3. Mark the order as paid
-                await markAsPaid(newOrder.data._id);
+                await markAsPaid(newOrder.data._id, paymentIntent);
                 toast.success("Payment successful!");
+
+                // 4. Fetch latest orders before navigating
+                const { fetchMyOrders } = useOrderStore.getState();
+                await fetchMyOrders();
+
                 navigate("/profile");
             } else {
                 toast.error("Payment did not succeed.");

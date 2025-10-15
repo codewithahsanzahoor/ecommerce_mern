@@ -57,10 +57,13 @@ const useOrderStore = create((set) => ({
     },
 
     // Action to mark an order as paid
-    markAsPaid: async (orderId) => {
+    markAsPaid: async (orderId, paymentResult) => {
         set({ loading: true, error: null });
         try {
-            const response = await api.put(`/api/orders/${orderId}/pay`);
+            const response = await api.put(
+                `/api/orders/${orderId}/pay`,
+                paymentResult
+            );
             set((state) => ({
                 orders: state.orders.map((order) =>
                     order._id === orderId
