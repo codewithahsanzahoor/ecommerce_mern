@@ -1,0 +1,212 @@
+###
+# API Test Requests for E-commerce MERN App
+#
+# Instructions:
+# 1. Make sure you have the "REST Client" extension installed in VS Code.
+# 2. Open this file in VS Code.
+# 3. Click the "Send Request" link that appears above each request to execute it.
+# 4. The response will appear in a new tab to the side.
+#
+# Variables:
+@baseUrl = http://localhost:5000/api
+@adminToken = 
+@userToken = 
+@productId = 
+@orderId = 
+
+##################################################
+# 1. Authentication
+##################################################
+
+### User Login (to get user token)
+# @name loginUser
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "ahsan@gmail.com",
+  "password": "ahsanahsan"
+}
+
+# Store the token for subsequent requests
+@userToken = {{loginUser.response.body.token}}
+
+### Admin Login (to get admin token)
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "ali@gmail.com",
+  "password": "aliali"
+}
+
+# Store the token for subsequent requests
+@adminToken = {{loginAdmin.response.body.token}}
+
+### Get Current User Profile (/me)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{userToken}}
+
+
+##################################################
+# 2. Products
+##################################################
+
+### Get all products
+GET {{baseUrl}}/products
+
+### Get a single product (replace with a real ID from your DB)
+GET {{baseUrl}}/products/68ea7db854cb25a16b5be6b6
+
+### Create a new product (Admin only)
+# @name createProduct
+POST {{baseUrl}}/products
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Test Product - From REST Client",
+  "price": 99.99,
+  "description": "A cool product created for testing purposes.",
+  "brand": "Tester",
+  "category": "Testing",
+  "countInStock": 50
+}
+
+@productId = {{createProduct.response.body.data._id}}
+
+### Update a product (Admin only)
+PUT {{baseUrl}}/products/{{productId}}
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Updated Test Product",
+  "price": 109.99
+}
+
+### Create a product review (User only)
+POST {{baseUrl}}/products/{{productId}}/reviews
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "rating": 5,
+  "comment": "This is an awesome product!"
+}
+
+### Delete a product (Admin only)
+DELETE {{baseUrl}}/products/{{productId}}
+Authorization: Bearer {{adminToken}}
+
+
+##################################################
+# 3. Cart
+##################################################
+
+### Add item to cart (User only)
+POST {{baseUrl}}/cart/add
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "productId": "68ea7db854cb25a16b5be6b6",
+  "quantity": 2
+}
+
+### Get cart contents (User only)
+GET {{baseUrl}}/cart
+Authorization: Bearer {{userToken}}
+
+### Update item quantity in cart (User only)
+PUT {{baseUrl}}/cart/update
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "productId": "68ea7db854cb25a16b5be6b6",
+  "quantity": 5
+}
+
+### Remove item from cart (User only)
+# Note: The backend expects data in the request body for DELETE
+DELETE {{baseUrl}}/cart/remove
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "productId": "68ea7db854cb25a16b5be6b6"
+}
+
+
+##################################################
+# 4. Orders & Payment
+##################################################
+
+### Create an order (User only)
+# This simulates the first step of the checkout process
+# @name createOrder
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": {
+    "address": "123 Test St",
+    "city": "Testville",
+    "postalCode": "12345",
+    "country": "TS"
+  },
+  "paymentMethod": "Stripe"
+}
+
+@orderId = {{createOrder.response.body.data._id}}
+
+### Get Stripe Publishable Key
+GET {{baseUrl}}/payment/config
+Authorization: Bearer {{userToken}}
+
+### Create Stripe Payment Intent
+POST {{baseUrl}}/payment/create-payment-intent
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "amount": 2500000 # Amount in cents (e.g., 25000.00)
+}
+
+### Mark order as paid (User only)
+# This simulates the callback after successful Stripe payment
+PUT {{baseUrl}}/orders/{{orderId}}/pay
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "id": "pi_3..._test_intent_id",
+  "status": "succeeded",
+  "created": 1678886400,
+  "receipt_email": "ahsan@gmail.com"
+}
+
+### Get my orders (User only)
+GET {{baseUrl}}/orders/myorders
+Authorization: Bearer {{userToken}}
+
+
+##################################################
+# 5. Admin Routes
+##################################################
+
+### Get all users (Admin only)
+GET {{baseUrl}}/users
+Authorization: Bearer {{adminToken}}
+
+### Get all orders (Admin only)
+GET {{baseUrl}}/orders/all
+Authorization: Bearer {{adminToken}}
+
+### Mark an order as delivered (Admin only)
+PUT {{baseUrl}}/orders/{{orderId}}/deliver
+Authorization: Bearer {{adminToken}}
+
