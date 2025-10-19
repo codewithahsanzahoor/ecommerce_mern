@@ -1,33 +1,23 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
-import DashboardOverviewComponent from '../../components/dashboard/DashboardOverviewComponent';
+import React, { useEffect } from "react";
+import DashboardOverviewComponent from "../../components/dashboard/DashboardOverviewComponent";
+import useStatsStore from "../../store/statsStore";
 
 function DashboardPage() {
-	const [stats, setStats] = useState({
-		totalOrders: 0,
-		productsInStock: 0,
-		usersSignedUp: 0,
-	});
+    const { stats, loading, fetchStats } = useStatsStore();
 
-	useEffect(() => {
-		// Fetch from your API endpoint here
-		const fetchStats = async () => {
-			// Simulated API data
-			const res = {
-				totalOrders: 87,
-				productsInStock: 129,
-				usersSignedUp: 45,
-			};
-			setStats(res);
-		};
+    useEffect(() => {
+        fetchStats();
+    }, [fetchStats]);
 
-		fetchStats();
-	}, []);
-	return (
-		<div id='dashboard'>
-			<DashboardOverviewComponent stats={stats} />
-		</div>
-	);
+    if (loading || !stats) {
+        return <div>Loading...</div>;
+    }
+
+    return (
+        <div id="dashboard">
+            <DashboardOverviewComponent stats={stats} />
+        </div>
+    );
 }
 
 export default DashboardPage;
