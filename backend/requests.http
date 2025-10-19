@@ -6,11 +6,19 @@
 # 2. Open this file in VS Code.
 # 3. Click the "Send Request" link that appears above each request to execute it.
 # 4. The response will appear in a new tab to the side.
-#
-# Variables:
+# 5. Manually copy values from responses (like tokens or IDs) and paste them into the variables below.
+
+##################################################
+# Variables
+# (Manually update these after running requests)
+##################################################
 @baseUrl = http://localhost:5000/api
-@adminToken = 
+
+# After running a login, copy the token here
 @userToken = 
+@adminToken = 
+
+# After creating a product or order, copy the ID here
 @productId = 
 @orderId = 
 
@@ -18,7 +26,7 @@
 # 1. Authentication
 ##################################################
 
-### User Login (to get user token)
+### User Login
 # @name loginUser
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
@@ -28,10 +36,7 @@ Content-Type: application/json
   "password": "ahsanahsan"
 }
 
-# Store the token for subsequent requests
-@userToken = {{loginUser.response.body.token}}
-
-### Admin Login (to get admin token)
+### Admin Login
 # @name loginAdmin
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
@@ -41,12 +46,9 @@ Content-Type: application/json
   "password": "aliali"
 }
 
-# Store the token for subsequent requests
-@adminToken = {{loginAdmin.response.body.token}}
-
 ### Get Current User Profile (/me)
 GET {{baseUrl}}/auth/me
-Authorization: Bearer {{userToken}}
+Authorization: Bearer < token >
 
 
 ##################################################
@@ -63,7 +65,7 @@ GET {{baseUrl}}/products/68ea7db854cb25a16b5be6b6
 # @name createProduct
 POST {{baseUrl}}/products
 Content-Type: application/json
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer <token>
 
 {
   "name": "Test Product - From REST Client",
@@ -74,12 +76,11 @@ Authorization: Bearer {{adminToken}}
   "countInStock": 50
 }
 
-@productId = {{createProduct.response.body.data._id}}
-
 ### Update a product (Admin only)
+# Note: Manually set @productId above first
 PUT {{baseUrl}}/products/{{productId}}
 Content-Type: application/json
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer <token>
 
 {
   "name": "Updated Test Product",
@@ -87,9 +88,10 @@ Authorization: Bearer {{adminToken}}
 }
 
 ### Create a product review (User only)
+# Note: Manually set @productId above first
 POST {{baseUrl}}/products/{{productId}}/reviews
 Content-Type: application/json
-Authorization: Bearer {{userToken}}
+Authorization: Bearer <token>
 
 {
   "rating": 5,
@@ -97,8 +99,9 @@ Authorization: Bearer {{userToken}}
 }
 
 ### Delete a product (Admin only)
+# Note: Manually set @productId above first
 DELETE {{baseUrl}}/products/{{productId}}
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer <token>
 
 
 ##################################################
@@ -108,7 +111,7 @@ Authorization: Bearer {{adminToken}}
 ### Add item to cart (User only)
 POST {{baseUrl}}/cart/add
 Content-Type: application/json
-Authorization: Bearer {{userToken}}
+Authorization: Bearer <token>
 
 {
   "productId": "68ea7db854cb25a16b5be6b6",
@@ -117,12 +120,12 @@ Authorization: Bearer {{userToken}}
 
 ### Get cart contents (User only)
 GET {{baseUrl}}/cart
-Authorization: Bearer {{userToken}}
+Authorization: Bearer <token>
 
 ### Update item quantity in cart (User only)
 PUT {{baseUrl}}/cart/update
 Content-Type: application/json
-Authorization: Bearer {{userToken}}
+Authorization: Bearer <token>
 
 {
   "productId": "68ea7db854cb25a16b5be6b6",
@@ -130,10 +133,9 @@ Authorization: Bearer {{userToken}}
 }
 
 ### Remove item from cart (User only)
-# Note: The backend expects data in the request body for DELETE
 DELETE {{baseUrl}}/cart/remove
 Content-Type: application/json
-Authorization: Bearer {{userToken}}
+Authorization: Bearer <token>
 
 {
   "productId": "68ea7db854cb25a16b5be6b6"
@@ -145,11 +147,10 @@ Authorization: Bearer {{userToken}}
 ##################################################
 
 ### Create an order (User only)
-# This simulates the first step of the checkout process
 # @name createOrder
 POST {{baseUrl}}/orders
 Content-Type: application/json
-Authorization: Bearer {{userToken}}
+Authorization: Bearer <token>
 
 {
   "shippingAddress": {
@@ -161,26 +162,24 @@ Authorization: Bearer {{userToken}}
   "paymentMethod": "Stripe"
 }
 
-@orderId = {{createOrder.response.body.data._id}}
-
 ### Get Stripe Publishable Key
 GET {{baseUrl}}/payment/config
-Authorization: Bearer {{userToken}}
+Authorization: Bearer <token>
 
 ### Create Stripe Payment Intent
 POST {{baseUrl}}/payment/create-payment-intent
 Content-Type: application/json
-Authorization: Bearer {{userToken}}
+Authorization: Bearer <token>
 
 {
-  "amount": 2500000 # Amount in cents (e.g., 25000.00)
+  "amount": 2500000
 }
 
 ### Mark order as paid (User only)
-# This simulates the callback after successful Stripe payment
+# Note: Manually set @orderId above first
 PUT {{baseUrl}}/orders/{{orderId}}/pay
 Content-Type: application/json
-Authorization: Bearer {{userToken}}
+Authorization: Bearer <token>
 
 {
   "id": "pi_3..._test_intent_id",
@@ -191,7 +190,7 @@ Authorization: Bearer {{userToken}}
 
 ### Get my orders (User only)
 GET {{baseUrl}}/orders/myorders
-Authorization: Bearer {{userToken}}
+Authorization: Bearer <token>
 
 
 ##################################################
@@ -200,13 +199,21 @@ Authorization: Bearer {{userToken}}
 
 ### Get all users (Admin only)
 GET {{baseUrl}}/users
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer <token>
 
 ### Get all orders (Admin only)
 GET {{baseUrl}}/orders/all
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer <token>
 
 ### Mark an order as delivered (Admin only)
+# Note: Manually set @orderId above first
 PUT {{baseUrl}}/orders/{{orderId}}/deliver
-Authorization: Bearer {{adminToken}}
+Authorization: Bearer <token>
 
+### Get Stats (Admin only)
+GET {{baseUrl}}/stats
+Authorization: Bearer <token>
+
+##########################################
+GET {{baseUrl}}/stats
+Authorization: Bearer <token>
